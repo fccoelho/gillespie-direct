@@ -88,7 +88,7 @@ cdef class Model(object):
         self.res = res
         cdef int i, steps
         if method =='SSA':
-            for i from 0 <= i<reps:
+            for i from 0 <= i < reps:
                 steps = self.GSSA(tmax,i)
             #print steps,' steps'
         elif method == 'SSAct':
@@ -110,7 +110,7 @@ cdef class Model(object):
         cdef np.ndarray[np.int64_t] ini = np.array(self.inits)
         cdef np.ndarray[np.double_t] r = self.rates
         pvi = self.pv #propensity functions
-        cdef int l,steps,i,tim, last_tim
+        cdef int l,steps,i, tim, last_tim
         cdef double tc, tau, a0
         #cdef np.ndarray[INT_t] tvec
         l=self.pvl
@@ -126,7 +126,7 @@ cdef class Model(object):
         steps = 0
         self.res[0,:,round]= ini
         a0=1.
-        for tim from 1<= tim <tmax:
+        for tim from 1<= tim < tmax:
             while tc < tim:
                 a0 = 0.0
                 for i from 0<= i < l:

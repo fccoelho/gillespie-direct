@@ -1,8 +1,4 @@
-from __future__ import absolute_import
-from __future__ import print_function
-from six.moves import map
-from six.moves import range
-# -*- coding:utf-8 -*-
+
 #-----------------------------------------------------------------------------
 # Name:        gillespie.py
 # Project:  Bayesian-Inference
@@ -18,18 +14,11 @@ __docformat__ = "restructuredtext en"
 from numpy.random import uniform, multinomial, exponential,random
 from numpy import arange, array, empty,zeros,log, isnan, nanmax, nan_to_num,  ceil
 import time
-import six.moves.xmlrpc_client
 import pdb
 import copy
 from multiprocessing import Pool
-try:
-    from liveplots import xmlrpcserver as xmlrpc
-    port = xmlrpc.rpc_plot(persist=0)
-    server = six.moves.xmlrpc_client.ServerProxy('http://localhost:%s'%port, allow_none=True)
-    viz = True
-except:
-    print("faiô...")
-    viz = False
+
+viz = False
 
 def dispatch(model):
     '''this function is necessary for paralelization'''
@@ -87,11 +76,9 @@ class Model:
         :Return:
             a numpy array of shape (reps,tmax,nvars)
         '''
-        if viz:  # only if Gnuplot.py is installed
-            self.viz = viz
         self.tmax = tmax
         #self.res = zeros((tmax,self.nvars,reps),dtype=float)
-        self.res = zeros((tmax,self.nvars),dtype=float)
+        self.res = zeros((tmax,self.nvars), dtype=float)
         tvec = arange(tmax, dtype=int)
             
         if method == 'SSA':
@@ -174,9 +161,7 @@ class Model:
                 last_tim = tim
         #self.evseries = evts
             if a0 == 0: break #breaks when no event has prob above 0
-        if self.viz:
-            #self.ser.clearFig()
-            self.server.lines(self.res.T.tolist(), [], self.vn, "Single replica")
+
         return self.res, evts
 
 

@@ -1,6 +1,3 @@
-from __future__ import absolute_import
-from __future__ import print_function
-# -*- coding:utf-8 -*-
 #-----------------------------------------------------------------------------
 # Name:        example.py
 # Project:  Bayesian-Inference
@@ -38,15 +35,12 @@ Is -> R : rs*Is
 Ic -> R : rc*Ic
 
 """
-#~ from cgillespie import Model as CModel
-# import pyximport
-# pyximport.install()
 import time
 
 from numpy import array
 
-from BIP.SDE.gillespie import Model
-from BIP.SDE.cgillespie import Model as CModel
+from gillespie import Model
+from gillespyx import Model as CModel
 
 
 vnames = ['S','E','Is','Ic','R']
@@ -91,7 +85,7 @@ print('Cython total time: ',ct, ' seconds.')
 # s.strip_dirs().sort_stats("time").print_stats()
 t2, series2, steps2 = CM.getStats()
 #print steps2, ' steps'
-print("Cython speedup: %sx" % (pt/ct))
+print(f"Cython speedup: {pt/ct}x")
 from pylab import plot, show, legend, title, figure
 print(series.shape)
 #print cevts

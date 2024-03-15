@@ -1,0 +1,1 @@
+cdef double f1(double r, double ini)

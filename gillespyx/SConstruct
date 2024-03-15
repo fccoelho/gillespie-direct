@@ -10,8 +10,8 @@ env.Append(CCFLAGS='-pthread -fno-strict-aliasing -DNDEBUG -g -fwrapv \
 -I/usr/local/lib/python{}/dist-packages/numpy/core/include -I/usr/include \
 -I/usr/include/python{}/ -I/usr/include/gsl/'.format(py_version, py_version))
 
-env.Cython('cgillespie.c','cgillespie.pyx')
-env.SharedLibrary('cgillespie',['cgillespie.c'], LIBPREFIX='',
+env.Cython('gillespyx.c','gillespyx.pyx')
+env.SharedLibrary('gillespyx',['gillespyx.c'], LIBPREFIX='',
                 LIBS=['gsl','gslcblas'],
                 LIBPATH=['/usr/local/lib/python{}/dist-packages/numpy/core/include'.format(py_version),
                         '/usr/include','/usr/include/python{}/'.format(py_version),'/usr/include/gsl/'])
