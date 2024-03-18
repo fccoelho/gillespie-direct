@@ -47,7 +47,7 @@ vnames = ['S','E','Is','Ic','R']
 #rates: b,ks,kc,rs,rc
 
 r = (0.001, 0.1, 0.1, 0.01, .01)
-ini = array((490,0,0,10,0)) #must be integers
+ini = array((190,0,0,10,0)) #must be integers
 # propensity functions
 def f1(r,ini):return r[0]*ini[0]*(ini[2]+ini[3])
 def f2(r,ini):return r[1]*ini[1]
@@ -93,6 +93,7 @@ plot(t, series.mean(axis=0),'-o')
 title('Python curve')
 legend(vnames, loc=0)
 figure()
+print(series2.shape)
 plot(t2, series2.mean(axis=2), '-o')
 title('Cython curve')
 legend(vnames, loc=0)

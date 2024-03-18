@@ -5,17 +5,20 @@
 #
 from numpy.random import uniform, exponential
 import numpy as np
-cimport numpy as np
+cimport numpy as cnp
 import time
 # from random import random
 cimport cython
 # from cython_gsl cimport *
 
+cnp.import_array()
+
 DTYPE = np.double
-UITYPE = np.uint64 
-ctypedef np.double_t DTYPE_t
-ctypedef np.int64_t INT_t
-ctypedef np.uint64_t UITYPE_t
+INT = np.int32
+UITYPE = np.uint32
+ctypedef cnp.double_t DTYPE_t
+ctypedef cnp.int32_t INT_t
+ctypedef cnp.uint32_t UITYPE_t
 
 cdef extern from "math.h":
     double log(double)
@@ -38,8 +41,8 @@ cdef extern from "/usr/include/gsl/gsl_rng.h":
 
 cdef extern from "/usr/include/gsl/gsl_randist.h":
     void gsl_ran_multinomial "gsl_ran_multinomial"(gsl_rng * r, size_t K,
-                                            unsigned int N, double p[],
-                                            unsigned int n[]) nogil
+                                            UITYPE_t N, double p[],
+                                            UITYPE_t n[]) nogil
 
 cdef gsl_rng *R = gsl_rng_alloc(gsl_rng_mt19937)
 
@@ -48,10 +51,10 @@ cdef inline double crandom():
     cdef double rm = RAND_MAX
     return c_libc_random()/rm
 
-cdef inline int gsl_multinomial(np.ndarray[DTYPE_t, ndim=1] p, unsigned int N):
+cdef inline UITYPE_t gsl_multinomial(cnp.ndarray[DTYPE_t, ndim=1] p, UITYPE_t N):
     cdef:
        size_t K = p.shape[0]
-       np.ndarray[np.uint32_t, ndim=1] n = np.zeros_like(p, dtype='uint32')
+       cnp.ndarray[UITYPE_t, ndim=1] n = np.zeros_like(p, dtype=UITYPE)
 
     # void gsl_ran_multinomial (const gsl_rng * r, size_t K, unsigned int N, const double p[], unsigned int n[])
     gsl_ran_multinomial(R, K, N, &p[0], &n[0])
@@ -60,8 +63,8 @@ cdef inline int gsl_multinomial(np.ndarray[DTYPE_t, ndim=1] p, unsigned int N):
 
 cdef class Model(object):
     cdef object vn,pv, inits
-    cdef np.ndarray tm,res,time,series, rates
-    cdef unsigned int pvl,nvars,steps
+    cdef cnp.ndarray tm,res,time,series, rates
+    cdef UITYPE_t pvl,nvars,steps
     cdef object ts
     def __init__(self,vnames,rates,inits, tmat,propensity):
         '''
@@ -83,8 +86,8 @@ cdef class Model(object):
         self.steps = 0
 
     cpdef run(self, method='SSA', int tmax=10, int reps=1):
-        cdef np.ndarray[np.int64_t,ndim=3] res = np.zeros((tmax,self.nvars,reps),dtype=np.int64)
-        cdef np.ndarray[np.int64_t,ndim=1] tvec = np.arange(tmax,dtype=np.int64)
+        cdef cnp.ndarray[INT_t,ndim=3] res = np.zeros((tmax,self.nvars,reps),dtype=INT)
+        cdef cnp.ndarray[INT_t,ndim=1] tvec = np.arange(tmax,dtype=INT)
         self.res = res
         cdef int i, steps
         if method =='SSA':
@@ -107,18 +110,18 @@ cdef class Model(object):
         '''
         Gillespie Direct algorithm
         '''
-        cdef np.ndarray[np.int64_t] ini = np.array(self.inits)
-        cdef np.ndarray[np.double_t] r = self.rates
+        cdef cnp.ndarray[INT_t, ndim=1] ini = np.array(self.inits, dtype=INT)
+        cdef cnp.ndarray[DTYPE_t, ndim=1] r = self.rates
         pvi = self.pv #propensity functions
         cdef int l,steps,i, tim, last_tim
         cdef double tc, tau, a0
         #cdef np.ndarray[INT_t] tvec
         l=self.pvl
-        cdef np.ndarray[np.double_t,ndim=1,mode="c"] pv = np.zeros(l,dtype='double')
+        cdef cnp.ndarray[DTYPE_t,ndim=1,mode="c"] pv = np.zeros(l,dtype=DTYPE)
 
         cdef:
             size_t K = l
-            np.ndarray[np.uint32_t, ndim=1] n = np.zeros(l, dtype='uint32')
+            cnp.ndarray[UITYPE_t, ndim=1] n = np.zeros(l, dtype=UITYPE)
         
         tm = self.tm
         #tvec = np.arange(tmax,dtype=int)
@@ -158,25 +161,25 @@ cdef class Model(object):
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-cpdef inline double l1(np.ndarray[np.float64_t,ndim=1] r,np.ndarray[np.int64_t,ndim=1] ini):
+cpdef inline DTYPE_t l1(cnp.ndarray[DTYPE_t ,ndim=1] r,cnp.ndarray[INT_t,ndim=1] ini):
     return r[0]*ini[0]*ini[1]
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-cpdef inline double l2(np.ndarray[np.float64_t,ndim=1] r,np.ndarray[np.int64_t,ndim=1] ini):
+cpdef inline DTYPE_t l2(cnp.ndarray[DTYPE_t,ndim=1] r,cnp.ndarray[INT_t,ndim=1] ini):
     return r[1]*ini[1]
 
 cpdef main():
     vars = ['s','i','r']
     cdef:
-        np.ndarray[np.int64_t,ndim=1] ini= np.array([500,1,0])
-        np.ndarray[np.float64_t,ndim=1] rates = np.array([.001,.1],dtype=np.float64)
-        np.ndarray[np.int64_t,ndim=2] tm = np.array([[-1,0],[1,-1],[0,1]],dtype=np.int64)
+        cnp.ndarray[INT_t,ndim=1] ini= np.array([500,1,0], dtype=INT)
+        cnp.ndarray[DTYPE_t,ndim=1] rates = np.array([.001,.1],dtype=DTYPE)
+        cnp.ndarray[INT_t,ndim=2] tm = np.array([[-1,0],[1,-1],[0,1]],dtype=INT)
     prop = [l1,l2]
     M = Model(vnames = vars,rates = rates,inits=ini, tmat=tm,propensity=prop)
     t0=time.time()
     M.run(tmax=80,reps=1000)
-    print 'total time: ',time.time()-t0
+    print('total time: ',time.time()-t0)
     return M.getStats()
 
 
