@@ -12,6 +12,9 @@ Cython = "^3.0.9"
 CythonGSL = "^0.2.2"
 numpy = "^1.26.4"
 scipy = "^1.12.0"
+taichi = "^1.7.0"
+matplotlib = "^3.8.3"
+mypy = "^1.9.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
