@@ -3,7 +3,7 @@ env.Decider('MD5')
 import sys
 py_version = sys.version[:4]
 
-cybld = Builder(action='cython3 -v -a -o $TARGET $SOURCE')
+cybld = Builder(action='cython3 -v -a -3 -o $TARGET $SOURCE')
 env.Append(BUILDERS={'Cython':cybld}) 
 env.Append(CCFLAGS='-pthread -fno-strict-aliasing -DNDEBUG -g -fwrapv \
 -Wall -Wstrict-prototypes -Wstrict-prototypes -O2 -fPIC \

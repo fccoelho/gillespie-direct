@@ -47,7 +47,7 @@ vnames = ['S','E','Is','Ic','R']
 #rates: b,ks,kc,rs,rc
 
 r = (0.001, 0.1, 0.1, 0.01, .01)
-ini = array((190,0,0,10,0)) #must be integers
+ini = array((4990,0,0,10,0)) #must be integers
 # propensity functions
 def f1(r,ini):return r[0]*ini[0]*(ini[2]+ini[3])
 def f2(r,ini):return r[1]*ini[1]
@@ -68,7 +68,7 @@ CM = CModel(vnames=vnames, rates=r, inits=ini, tmat=tmat, propensity=propf)
 
 # timing python gillespie
 t0 = time.time()
-M.run(tmax=80, reps=1000, viz=0, serial=1)
+M.run(tmax=180, reps=1000, viz=0, serial=1)
 pt = time.time()-t0
 print('Python total time: ', pt, ' seconds.')
 t, series, steps, evts = M.getStats()
@@ -78,7 +78,7 @@ t, series, steps, evts = M.getStats()
 # timing cython gillespie
 # cProfile.runctx("CM.run(tmax=80, reps=1000)", globals(), locals(), 'cgil_Profile.prof')
 t0 = time.time()
-CM.run(tmax=80, reps=1000)
+CM.run(tmax=180, reps=1000)
 ct = time.time()-t0
 print('Cython total time: ',ct, ' seconds.')
 # s = pstats.Stats('cgil_Profile.prof')
@@ -88,13 +88,14 @@ t2, series2, steps2 = CM.getStats()
 print(f"Cython speedup: {pt/ct}x")
 from pylab import plot, show, legend, title, figure
 print(series.shape)
-#print cevts
-plot(t, series.mean(axis=0),'-o')
+# print(series.std(axis=0))
+plot(t, series.mean(axis=0), '-.')
 title('Python curve')
 legend(vnames, loc=0)
 figure()
 print(series2.shape)
-plot(t2, series2.mean(axis=2), '-o')
+plot(t2, series2.mean(axis=2), '-.')
+# plot(t2, series2[:,:,0], '-.')
 title('Cython curve')
 legend(vnames, loc=0)
 show()

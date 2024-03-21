@@ -15,6 +15,7 @@ import numpy as np
 from numpy.random import multinomial,  random
 from numpy import arange, array, empty, zeros, log, isnan, nanmax, nan_to_num, ceil, ndarray
 import time
+import copy
 from typing import List, Tuple, Callable, Union, Dict, Any
 
 from multiprocessing import Pool
@@ -98,7 +99,8 @@ class Model:
                 pool.close()
                 pool.join()
             else:  # Serial
-                res = list(map(dispatch, [self] * reps))
+                # res = list(map(dispatch, [self] * reps))
+                res = [self.GSSA() for i in range(reps)]
                 self.res = array([i[0] for i in res])
                 if reps == 0:
                     self.evseries = res[0][1]
@@ -130,7 +132,8 @@ class Model:
         last_tim = 0  # first time step of results
         evts: Dict[int,List[float]] = dict([(i, []) for i in range(len(self.pv))])
         self.steps = 0
-        self.res[0, :] = ini
+        res = copy.deepcopy(self.res)
+        res[0, :] = ini
         #        for tim in xrange(1,tmax):
         while tc <= tmax:
             i = 0
@@ -157,18 +160,18 @@ class Model:
                     #                if a0 == 0: break
                     if tim - last_tim > 1:
                         for j in range(last_tim, tim):
-                            self.res[j, :] = self.res[last_tim, :]
-                    self.res[tim, :] = ini
+                            res[j, :] = res[last_tim, :]
+                    res[tim, :] = ini
                 else:
                     for j in range(last_tim, tmax):
-                        self.res[j, :] = self.res[last_tim, :]
+                        res[j, :] = res[last_tim, :]
                     break
                 last_tim = tim
             # self.evseries = evts
             if a0 == 0:
                 break  # breaks when no event has prob above 0
 
-        return self.res, evts
+        return res, evts
 
 
 def p1(r: np.ndarray, ini: np.ndarray) -> float:

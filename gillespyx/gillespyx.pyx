@@ -1,15 +1,13 @@
-# cython: profile=True
+# cython: profile=False
 # cython.boundscheck = False
 # cython.cdivision = True
 # cython.wraparound = False
 #
-from numpy.random import uniform, exponential
+
 import numpy as np
 cimport numpy as cnp
 import time
-# from random import random
 cimport cython
-# from cython_gsl cimport *
 
 cnp.import_array()
 
@@ -25,7 +23,7 @@ cdef extern from "math.h":
 
 @cython.profile(False)
 cdef inline double clog(double x):
-    return log(x*x)
+    return log(x)
 
 cdef extern from "stdlib.h":
     double RAND_MAX
@@ -54,7 +52,8 @@ cdef inline double crandom():
 cdef inline UITYPE_t gsl_multinomial(cnp.ndarray[DTYPE_t, ndim=1] p, UITYPE_t N):
     cdef:
        size_t K = p.shape[0]
-       cnp.ndarray[UITYPE_t, ndim=1] n = np.zeros_like(p, dtype=UITYPE)
+       cnp.ndarray[UITYPE_t, ndim=1] n = np.zeros(p, dtype=UITYPE)
+
 
     # void gsl_ran_multinomial (const gsl_rng * r, size_t K, unsigned int N, const double p[], unsigned int n[])
     gsl_ran_multinomial(R, K, N, &p[0], &n[0])
@@ -62,8 +61,8 @@ cdef inline UITYPE_t gsl_multinomial(cnp.ndarray[DTYPE_t, ndim=1] p, UITYPE_t N)
     return n
 
 cdef class Model(object):
-    cdef object vn,pv, inits
-    cdef cnp.ndarray tm,res,time,series, rates
+    cdef object vn,pv
+    cdef cnp.ndarray tm,res,time,series, rates, inits
     cdef UITYPE_t pvl,nvars,steps
     cdef object ts
     def __init__(self,vnames,rates,inits, tmat,propensity):
@@ -76,7 +75,7 @@ cdef class Model(object):
         '''
         self.vn = vnames
         self.rates = np.array(rates)
-        self.inits = tuple(inits)
+        self.inits = inits
         self.tm = tmat
         self.pv = propensity#[compile(eq,'errmsg','eval') for eq in propensity]
         self.pvl = len(self.pv) #length of propensity vector
